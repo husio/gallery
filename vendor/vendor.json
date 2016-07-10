@@ -1,0 +1,61 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "OwFJcAb9f/J0e4JDKfzkm/SiniU=",
+			"path": "github.com/disintegration/imaging",
+			"revision": "d8bbae1de109b518dabc98c6c1633eb358c148a4",
+			"revisionTime": "2016-02-28T07:34:35Z"
+		},
+		{
+			"checksumSHA1": "oxvSPYZbYMjGybO7er4ycq2627w=",
+			"path": "github.com/jmoiron/sqlx",
+			"revision": "bdae0c3219c3bdb92f3d7c70825018712787c933",
+			"revisionTime": "2016-06-15T15:18:03Z"
+		},
+		{
+			"checksumSHA1": "NJHTyLwheqVk7+syzj9UN7p1dKs=",
+			"path": "github.com/jmoiron/sqlx/reflectx",
+			"revision": "bdae0c3219c3bdb92f3d7c70825018712787c933",
+			"revisionTime": "2016-06-15T15:18:03Z"
+		},
+		{
+			"checksumSHA1": "+q6a7iju2XMMu5DB/we6odv3/Iw=",
+			"path": "github.com/mattn/go-sqlite3",
+			"revision": "38ee283dabf11c9cbdb968eebd79b1fa7acbabe6",
+			"revisionTime": "2016-05-14T12:23:48Z"
+		},
+		{
+			"checksumSHA1": "A/Zl7n+NZrzHDK7sdJG0xL2S/FE=",
+			"path": "github.com/rwcarlsen/goexif/exif",
+			"revision": "41dad3aa083329f3f672b7095a9ea8a0c384bbe8",
+			"revisionTime": "2014-12-22T21:16:34Z"
+		},
+		{
+			"checksumSHA1": "bBmKkRYPKiGH8ZbLZH8LOY6xmxQ=",
+			"path": "github.com/rwcarlsen/goexif/tiff",
+			"revision": "41dad3aa083329f3f672b7095a9ea8a0c384bbe8",
+			"revisionTime": "2014-12-22T21:16:34Z"
+		},
+		{
+			"checksumSHA1": "UD/pejajPyS7WaWVXq2NU1eK4Ic=",
+			"path": "golang.org/x/image/bmp",
+			"revision": "a21e5be7b49fd6d0c47097c7a31fb763802c1117",
+			"revisionTime": "2016-07-01T06:56:48Z"
+		},
+		{
+			"checksumSHA1": "ctyyddkXAz6xBcMGo2Brocz1iuY=",
+			"path": "golang.org/x/image/tiff",
+			"revision": "a21e5be7b49fd6d0c47097c7a31fb763802c1117",
+			"revisionTime": "2016-07-01T06:56:48Z"
+		},
+		{
+			"checksumSHA1": "Xnm81x3lWS6xRxSthJuLt+fpfi0=",
+			"path": "golang.org/x/image/tiff/lzw",
+			"revision": "a21e5be7b49fd6d0c47097c7a31fb763802c1117",
+			"revisionTime": "2016-07-01T06:56:48Z"
+		}
+	],
+	"rootPath": "github.com/husio/gallery"
+}
