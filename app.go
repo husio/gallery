@@ -9,6 +9,7 @@ import (
 	"github.com/husio/gallery/gallery/storage"
 	"github.com/husio/gallery/web"
 
+	"github.com/husio/x/envconf"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -24,6 +25,7 @@ func main() {
 		Database:  "/tmp/gallery.sqlite3",
 		UploadDir: "/tmp/gallery",
 	}
+	envconf.Must(envconf.LoadEnv(&conf))
 	if err := run(conf); err != nil {
 		log.Fatalf("application error: %s", err)
 	}

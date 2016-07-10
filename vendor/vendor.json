@@ -9,6 +9,12 @@
 			"revisionTime": "2016-02-28T07:34:35Z"
 		},
 		{
+			"checksumSHA1": "BjMMGZ4suYosM2H/MyqO6LdGsNc=",
+			"path": "github.com/husio/x/envconf",
+			"revision": "66352dfc99111fa32f4cae11b751c488a4218012",
+			"revisionTime": "2016-05-10T08:54:40Z"
+		},
+		{
 			"checksumSHA1": "oxvSPYZbYMjGybO7er4ycq2627w=",
 			"path": "github.com/jmoiron/sqlx",
 			"revision": "bdae0c3219c3bdb92f3d7c70825018712787c933",
