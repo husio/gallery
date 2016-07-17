@@ -2,15 +2,13 @@ package handler
 
 import (
 	"fmt"
-	"image/jpeg"
 	"io"
 	"log"
 	"net/http"
-	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/disintegration/imaging"
 	"github.com/husio/gallery/gallery/storage"
 	"github.com/husio/gallery/sq"
 	"github.com/husio/gallery/web"
@@ -21,27 +19,12 @@ func PhotoList(
 	listImages func(sq.Selector, storage.ImagesOpts) ([]*storage.Image, error),
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var tags []storage.KeyValue
-		for _, raw := range r.URL.Query()["tag"] {
-			rawpair, err := url.QueryUnescape(raw)
-			if err != nil {
-				log.Printf("cannot unescape %q: %s", raw, err)
-				continue
-			}
-			pair := strings.SplitN(rawpair, "=", 2)
-			if len(pair) != 2 {
-				continue
-			}
-			tags = append(tags, storage.KeyValue{
-				Key:   pair[0],
-				Value: pair[1],
-			})
-		}
-
-		const perPage = 200
+		const perPage = 20
+		offset, _ := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
 		images, err := listImages(db, storage.ImagesOpts{
-			Limit: perPage,
-			Tags:  tags,
+			Offset: offset,
+			Limit:  perPage,
+			Tags:   r.URL.Query()["tag"],
 		})
 		if err != nil {
 			renderErr(w, err.Error())
@@ -62,7 +45,7 @@ func PhotoList(
 func PhotoUpload(
 	db sq.Selector,
 	tagGroups func(sq.Selector) ([]*storage.TagGroup, error),
-	uploadFile func(fd io.ReadSeeker, tags map[string]string) error,
+	uploadFile func(fd io.ReadSeeker, tags []string) error,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
@@ -88,20 +71,14 @@ func PhotoUpload(
 			renderErr(w, err.Error())
 		}
 
-		tags := make(map[string]string)
+		var tags []string
 		for i := 1; i < 20; i++ {
-			name := r.FormValue(fmt.Sprintf("tag_name_%d", i))
+			name := r.FormValue(fmt.Sprintf("tag_%d", i))
 			name = strings.TrimSpace(name)
 			if name == "" {
 				continue
 			}
-			value := r.FormValue(fmt.Sprintf("tag_value_%d", i))
-			value = strings.TrimSpace(value)
-			if value == "" {
-				continue
-			}
-
-			tags[name] = value
+			tags = append(tags, name)
 		}
 
 		for _, f := range r.MultipartForm.File["photos"] {
@@ -125,7 +102,7 @@ func PhotoUpload(
 func ServePhoto(
 	db sq.Getter,
 	imageByID func(sq.Getter, string) (*storage.Image, error),
-	openImage func(year int, id string) (io.ReadCloser, error),
+	openImage func(year, orientation int, id string) (io.ReadCloser, error),
 ) web.Handler {
 	return func(w http.ResponseWriter, r *http.Request, arg web.PathArg) {
 		img, err := imageByID(db, arg(0))
@@ -145,7 +122,7 @@ func ServePhoto(
 			return
 		}
 
-		fd, err := openImage(img.Created.Year(), img.ImageID)
+		fd, err := openImage(img.Created.Year(), img.Orientation, img.ImageID)
 		if err != nil {
 			log.Printf("cannot read %q image file: %s", img.ImageID, err)
 			renderErr(w, err.Error())
@@ -159,36 +136,7 @@ func ServePhoto(
 		w.Header().Set("X-Image-Created", img.Created.Format(time.RFC3339))
 		w.Header().Set("Content-Type", "image/jpeg")
 
-		if r.URL.Query().Get("resize") == "" {
-			io.Copy(w, fd)
-			return
-		}
-
-		image, err := jpeg.Decode(fd)
-		if err != nil {
-			log.Printf("cannot read %q image file: %s", img.ImageID, err)
-			renderErr(w, err.Error())
-			return
-		}
-		var width, height int
-		if _, err := fmt.Sscanf(r.URL.Query().Get("resize"), "%dx%d", &width, &height); err != nil {
-			log.Printf("cannot resize %q image: %s", img.ImageID, err)
-		} else {
-			switch img.Orientation {
-			case 1:
-				// all good
-			case 3:
-				image = imaging.Rotate180(image)
-			case 8:
-				image = imaging.Rotate90(image)
-			case 6:
-				image = imaging.Rotate270(image)
-			default:
-				log.Printf("unknown image orientation: %s", img.ImageID)
-			}
-			image = imaging.Fill(image, width, height, imaging.Center, imaging.Linear)
-		}
-		imaging.Encode(w, image, imaging.JPEG)
+		io.Copy(w, fd)
 	}
 }
 

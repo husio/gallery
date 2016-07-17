@@ -2,11 +2,13 @@ package storage
 
 import (
 	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"image/jpeg"
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/husio/gallery/sq"
@@ -25,7 +27,7 @@ func NewUploader(db sq.Execer, fs *FileStore) *Uploader {
 	}
 }
 
-func (u *Uploader) Upload(fd io.ReadSeeker, tags map[string]string) error {
+func (u *Uploader) Upload(fd io.ReadSeeker, tags []string) error {
 	now := time.Now()
 
 	image, err := imageMeta(fd)
@@ -55,11 +57,10 @@ func (u *Uploader) Upload(fd io.ReadSeeker, tags map[string]string) error {
 		return fmt.Errorf("database error: %s", err)
 	}
 
-	for name, value := range tags {
+	for _, name := range tags {
 		_, err := CreateTag(u.db, Tag{
 			ImageID: image.ImageID,
 			Name:    name,
-			Value:   value,
 			Created: now,
 		})
 		if err != nil {
@@ -117,4 +118,13 @@ func imageMeta(r io.ReadSeeker) (*Image, error) {
 	}
 
 	return &img, nil
+}
+
+func encode(h hasher) string {
+	s := base64.URLEncoding.EncodeToString(h.Sum(nil))
+	return strings.TrimRight(s, "=")
+}
+
+type hasher interface {
+	Sum(b []byte) []byte
 }

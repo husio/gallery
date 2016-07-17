@@ -8,9 +8,9 @@ CREATE TABLE images (
 
 
 CREATE TABLE tags (
-    tag_id       TEXT NOT NULL PRIMARY KEY,
-    image_id     TEXT NOT NULL REFERENCES images(image_id),
     name         TEXT NOT NULL,
-    value        TEXT NOT NULL,
-    created      TIMESTAMP NOT NULL
+    image_id     TEXT NOT NULL REFERENCES images(image_id),
+    created      TIMESTAMP NOT NULL,
+
+    PRIMARY KEY(name, image_id)
 );

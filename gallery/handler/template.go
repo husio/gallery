@@ -65,24 +65,17 @@ var tmpl = template.Must(template.New("").Parse(`
                 <form enctype="multipart/form-data" action="/upload" method="POST">
                         <h3>1. tag uploaded pictures</h3>
                         <div>
-                                <input type="text" name="tag_name_1" placeholder="tag name" value="description">
-                                <input type="text" name="tag_value_1"  placeholder="eg. Holiday in Korea or Weekend in Gdansk" autofocus>
+                                <input type="text" name="tag_1"  placeholder="eg. Holiday in Korea or Weekend in Gdansk" autofocus>
                         </div>
                         <div>
-                                <input type="text" name="tag_name_2" placeholder="tag name" value="place">
-                                <input type="text" name="tag_value_2" placeholder="eg. Croatia, Jeju or Berlin">
+                                <input type="text" name="tag_2" placeholder="eg. Croatia, Jeju or Berlin">
                         </div>
                         <div>
-                                <input type="text" name="tag_name_3" placeholder="tag name">
-                                <input type="text" name="tag_value_3" placeholder="value">
-                        </div>
-                        <div>
-                                <input type="text" name="tag_name_3" placeholder="tag name">
-                                <input type="text" name="tag_value_3" placeholder="value">
+                                <input type="text" name="tag_3" placeholder="value">
                         </div>
                         <h5>Exising tags</h5>
                         {{range .Tags}}
-                                <div><a href="/?tag={{.Name}}%3D{{.Value}}">{{.Name}} = {{.Value}}</a> {{.Count}}</div>
+                                <div><a href="/?tag={{.Name}}">{{.Name}}</a> {{.Count}}</div>
                         {{end}}
 
                         <h3>2. select files to upload</h3>
@@ -107,15 +100,13 @@ var tmpl = template.Must(template.New("").Parse(`
                 <div>
                         Filter photos
                         <form action="/" method="GET">
-                                <input type="search" name="tag" placeholder="tag in format name=value" required>
+                                <input type="search" name="tag" placeholder="Search photos" required>
                                 <input type="submit" value="Search">
                         </form>
                 </div>
                 {{range .Images}}
                         <a href="/photo/{{.ImageID}}">
-                                <img
-                                        src="/photo/{{.ImageID}}?resize=100x100"
-                                        title="{{.Created}}">
+                                <img src="/thumbnail/{{.ImageID}}.jpg" title="{{.Created}}" style="width:100px;height:100px;background:#000;">
                         </a>
                 {{else}}
                         <div>No photos</div>

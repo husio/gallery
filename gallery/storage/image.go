@@ -1,10 +1,6 @@
 package storage
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/husio/gallery/qb"
@@ -21,28 +17,19 @@ type Image struct {
 }
 
 type Tag struct {
-	TagID   string    `db:"tag_id"   json:"tagId"`
+	Name    string    `db:"name"   json:"name"`
 	ImageID string    `db:"image_id" json:"imageId"`
-	Name    string    `db:"name"     json:"name"`
-	Value   string    `db:"value"    json:"value"`
 	Created time.Time `db:"created"  json:"created"`
 }
 
 func CreateTag(e sq.Execer, tag Tag) (*Tag, error) {
-	oid := sha256.New()
-	fmt.Fprint(oid, tag.ImageID)
-	fmt.Fprint(oid, tag.Name)
-	fmt.Fprint(oid, tag.Value)
-	tag.TagID = encode(oid)
-
 	if tag.Created.IsZero() {
 		tag.Created = time.Now()
 	}
-
 	_, err := e.Exec(`
-		INSERT INTO tags (tag_id, image_id, name, value, created)
-		VALUES (?, ?, ?, ?, ?)
-	`, tag.TagID, tag.ImageID, tag.Name, tag.Value, tag.Created)
+		INSERT INTO tags (image_id, name, created)
+		VALUES (?, ?, ?)
+	`, tag.ImageID, tag.Name, tag.Created)
 	return &tag, sq.CastErr(err)
 }
 
@@ -52,8 +39,8 @@ func Images(s sq.Selector, opts ImagesOpts) ([]*Image, error) {
 		q = qb.Q("SELECT i.* FROM images i")
 	} else {
 		q = qb.Q("SELECT i.* FROM images i INNER JOIN tags t ON i.image_id = t.image_id")
-		for _, kv := range opts.Tags {
-			q.Where("t.name = ? AND t.value = ?", kv.Key, kv.Value)
+		for _, name := range opts.Tags {
+			q.Where("t.name = ?", name)
 		}
 	}
 
@@ -68,12 +55,7 @@ func Images(s sq.Selector, opts ImagesOpts) ([]*Image, error) {
 type ImagesOpts struct {
 	Limit  int64
 	Offset int64
-	Tags   []KeyValue
-}
-
-type KeyValue struct {
-	Key   string
-	Value string
+	Tags   []string
 }
 
 func CreateImage(e sq.Execer, img Image) (*Image, error) {
@@ -113,24 +95,14 @@ func ImageTags(s sq.Selector, imageID string) ([]*Tag, error) {
 func TagGroups(s sq.Selector) ([]*TagGroup, error) {
 	var tags []*TagGroup
 	err := s.Select(&tags, `
-                SELECT name, value, sum(1) AS count
+                SELECT name, sum(1) AS count
                 FROM tags
-                GROUP BY name, value
+                GROUP BY name
         `)
 	return tags, sq.CastErr(err)
 }
 
 type TagGroup struct {
 	Name  string `db:"name"     json:"name"`
-	Value string `db:"value"    json:"value"`
 	Count int    `db:"count"    json:"count"`
-}
-
-func encode(h hasher) string {
-	s := base64.URLEncoding.EncodeToString(h.Sum(nil))
-	return strings.TrimRight(s, "=")
-}
-
-type hasher interface {
-	Sum(b []byte) []byte
 }
