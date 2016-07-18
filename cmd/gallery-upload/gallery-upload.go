@@ -12,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/cheggaaa/pb"
 )
 
 func main() {
@@ -19,18 +21,30 @@ func main() {
 	tagsFl := flag.String("tags", "", "Coma separated tags")
 	flag.Parse()
 
+	photos := flag.Args()
+	if len(photos) == 0 {
+		flag.PrintDefaults()
+		return
+	}
+
 	tags := strings.Split(*tagsFl, ",")
-	if err := run(*uploadUrlFl, flag.Args(), tags); err != nil {
+	if err := run(*uploadUrlFl, photos, tags); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func run(urlStr string, photos, tags []string) error {
+	bar := pb.StartNew(len(photos))
+	defer bar.Finish()
+
 	for _, photo := range photos {
+		bar.Prefix(filepath.Base(photo))
 		if err := upload(urlStr, photo, tags); err != nil {
 			return fmt.Errorf("%s: %s", photo, err)
 		}
+		bar.Increment()
 	}
+
 	return nil
 }
 

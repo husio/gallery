@@ -19,11 +19,10 @@ func PhotoList(
 	listImages func(sq.Selector, storage.ImagesOpts) ([]*storage.Image, error),
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const perPage = 20
 		offset, _ := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
 		images, err := listImages(db, storage.ImagesOpts{
 			Offset: offset,
-			Limit:  perPage,
+			Limit:  100,
 			Tags:   r.URL.Query()["tag"],
 		})
 		if err != nil {

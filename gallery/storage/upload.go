@@ -54,7 +54,7 @@ func (u *Uploader) Upload(fd io.ReadSeeker, tags []string) error {
 	case sq.ErrConflict:
 		// image already exists, nothing more to do here
 	default:
-		return fmt.Errorf("database error: %s", err)
+		return fmt.Errorf("database error: cannot store photo: %s", err)
 	}
 
 	for _, name := range tags {
@@ -63,8 +63,13 @@ func (u *Uploader) Upload(fd io.ReadSeeker, tags []string) error {
 			Name:    name,
 			Created: now,
 		})
-		if err != nil {
-			return fmt.Errorf("database error: %s", err)
+		switch err {
+		case nil:
+			// all good
+		case sq.ErrConflict:
+			// image already exists, nothing more to do here
+		default:
+			return fmt.Errorf("database error: cannot tag: %s", err)
 		}
 	}
 
