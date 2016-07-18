@@ -65,7 +65,7 @@ func (fs *FileStore) PutMeta(img *Image) error {
 	return nil
 }
 
-func (fs *FileStore) Read(year, _ int, imageID string) (io.ReadCloser, error) {
+func (fs *FileStore) Read(year int, imageID string) (io.ReadCloser, error) {
 	path := filepath.Join(fs.photos, fmt.Sprint(year), imageID+".jpg")
 	return os.Open(path)
 }
@@ -77,7 +77,7 @@ func (fs *FileStore) ReadThumbnail(year, orientation int, imageID string) (io.Re
 		return fd, nil
 	}
 
-	img, err := fs.Read(year, orientation, imageID)
+	img, err := fs.Read(year, imageID)
 	if err != nil {
 		return nil, fmt.Errorf("cannot read photo file: %s", err)
 	}

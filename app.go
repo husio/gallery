@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -56,7 +57,8 @@ func run(conf configuration) error {
 	rt := web.NewRouter()
 	rt.Add(`/`, "GET", handler.PhotoList(db, storage.Images))
 	rt.Add(`/upload`, "GET,POST", handler.PhotoUpload(db, storage.TagGroups, uploader.Upload))
-	rt.Add(`/photo/(name)`, "GET", handler.ServePhoto(db, storage.ImageByID, fs.Read))
+	fsRead := func(year, orient int, imgID string) (io.ReadCloser, error) { return fs.Read(year, imgID) }
+	rt.Add(`/photo/(name)`, "GET", handler.ServePhoto(db, storage.ImageByID, fsRead))
 	rt.Add(`/thumbnail/(name)\.jpg`, "GET", handler.ServePhoto(db, storage.ImageByID, fs.ReadThumbnail))
 
 	log.Printf("running HTTP server: %s", conf.HTTP)
