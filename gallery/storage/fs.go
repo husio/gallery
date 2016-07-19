@@ -8,12 +8,16 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/disintegration/imaging"
 )
 
 type FileStore struct {
-	photos     string
+	photos string
+
+	// make sure only one storage is in use at any time to not abuse hdd
+	mu         sync.Mutex
 	thumbnails string
 }
 
@@ -71,6 +75,9 @@ func (fs *FileStore) Read(year int, imageID string) (io.ReadCloser, error) {
 }
 
 func (fs *FileStore) ReadThumbnail(year, orientation int, imageID string) (io.ReadCloser, error) {
+	fs.mu.Lock()
+	defer fs.mu.Unlock()
+
 	path := filepath.Join(fs.thumbnails, fmt.Sprint(year), imageID+".jpg")
 	fd, err := os.Open(path)
 	if err == nil {

@@ -20,9 +20,13 @@ func PhotoList(
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		offset, _ := strconv.ParseInt(r.URL.Query().Get("offset"), 10, 64)
+		limit, _ := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 64)
+		if limit == 0 {
+			limit = 100
+		}
 		images, err := listImages(db, storage.ImagesOpts{
 			Offset: offset,
-			Limit:  100,
+			Limit:  limit,
 			Tags:   r.URL.Query()["tag"],
 		})
 		if err != nil {
